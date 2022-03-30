@@ -84,59 +84,7 @@
   .m-p-github {
     bottom: 150px;
   }
-  /*广告*/
-  .m-p-refer {
-    position: absolute;
-    left: 50px;
-    bottom: 50px;
-  }
-  .m-p-refer .text {
-    position: absolute;
-    top: -80px;
-    left: -40px;
-    animation-name: upAnimation;
-    transform-origin: center bottom;
-    animation-duration: 2s;
-    animation-fill-mode: both;
-    animation-iteration-count: infinite;
-    animation-delay: .5s;
-  }
-  .m-p-refer .close {
-    display: block;
-    position: absolute;
-    top: -110px;
-    right: -50px;
-    padding: 0;
-    margin: 0;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    z-index: 3;
-    transition: 0.3s all;
-    background-size: 30px 30px;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-image: url(https://blog.luckly-mjw.cn/tool-show/m3u8-downloader/imgs/close.png);
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  .m-p-refer .close:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-  .m-p-refer .link {
-    border-radius: 4px;
-    text-decoration: none;
-    background-color: #4E84E6;
-    transition: 0.3s all;
-  }
-  .m-p-refer .link:hover {
-    top: -10px;
-    color: #333333;
-    border: 1px solid transparent;
-    background: rgba(0, 0, 0, 0.6);
-    box-shadow: 2px 11px 20px 0 rgba(0, 0, 0, 0.6);
-  }
+  
   @keyframes upAnimation {
     0% {
       transform: rotate(0deg);
@@ -354,22 +302,16 @@
 <section id="m-app" v-cloak>
   <!--顶部操作提示-->
   <section class="m-p-action g-box">{{tips}}</section>
-  <a class="m-p-help" target="_blank" href="https://segmentfault.com/a/1190000021847172">?</a>
+  <!-- <a class="m-p-help" target="_blank" href="https://segmentfault.com/a/1190000021847172">?</a>
   <a class="m-p-tamper" target="_blank" href="https://blog.luckly-mjw.cn/tool-show/m3u8-downloader/m3u8-downloader.user.js">手动添加油猴插件</a>
   <a class="m-p-github" target="_blank" href="https://github.com/Momo707577045/m3u8-downloader">github</a>
   <a class="m-p-other" target="_blank" href="http://blog.luckly-mjw.cn/tool-show/index.html">其他实用工具</a>
-  <a class="m-p-language" href="http://blog.luckly-mjw.cn/tool-show/m3u8-downloader/index-en.html">English version</a>
-
-  <!--广告-->
-  <a v-if="isShowRefer" class="m-p-refer" target="_blank" href="https://segmentfault.com/a/1190000024416860">
-    <img src="https://blog.luckly-mjw.cn/tool-show/m3u8-downloader/imgs/001.png" class="link">
-    <img src="https://blog.luckly-mjw.cn/tool-show/m3u8-downloader/imgs/003.png" class="text">
-    <i class="close" @click.prevent="isShowRefer=false"></i>
-  </a>
+  <a class="m-p-language" href="http://blog.luckly-mjw.cn/tool-show/m3u8-downloader/index-en.html">English version</a> -->
 
   <!--文件载入-->
   <div class="m-p-temp-url">测试链接：http://1257120875.vod2.myqcloud.com/0ef121cdvodtransgzp1257120875/3055695e5285890780828799271/v.f230.m3u8</div>
   <section class="m-p-input-container">
+    <input type="text" v-model="title"/>
     <input type="text" v-model="url" :disabled="downloading" placeholder="请输入 m3u8 链接">
 
     <!--范围查询-->
@@ -407,13 +349,6 @@
 </body>
 
 <script>
-var _hmt = _hmt || [];
-(function () {
-  var hm = document.createElement("script");
-  hm.src = "https://hm.baidu.com/hm.js?1f12b0865d866ae1b93514870d93ce89";
-  var s = document.getElementsByTagName("script")[0];
-  s.parentNode.insertBefore(hm, s);
-})();
 </script>
 <!--vue 前端框架-->
 <script src="https://upyun.luckly-mjw.cn/lib/vue.js"></script>
@@ -429,8 +364,9 @@ new Vue({
 
   data() {
     return {
+      title: document.getElementsByClassName("play-title")[0].textContent,
       url: '', // 在线链接
-      tips: 'm3u8 视频在线提取工具', // 顶部提示
+      tips: 'download tools', // 顶部提示
       isPause: false, // 是否暂停下载
       isGetMP4: false, // 是否转码为 MP4 下载
       durationSecond: 0, // 视频持续时长
@@ -466,6 +402,10 @@ new Vue({
   created() {
     this.getSource();
     window.addEventListener('keyup', this.onKeyup)
+
+    setTimeout(() => {
+      this.getM3U8()
+    }, 500);
   },
 
   beforeDestroy() {
@@ -616,7 +556,7 @@ new Vue({
             this.aesConf.uri = (m3u8Str.match(/(.*URI="([^"]+))"/) || ['', '', ''])[2]
             this.aesConf.iv = (m3u8Str.match(/(.*IV=([^,\s]+))/) || ['', '', ''])[2]
             this.aesConf.iv = this.aesConf.iv ? this.aesConf.stringToBuffer(this.aesConf.iv) : ''
-            this.aesConf.uri = this.applyURL(this.aesConf.uri, this.url)
+            this.aesConf.uri = this.applyURL(this.aesConf.uri, this.url) + "?token=" + player.HTML5.opacityToken.token
 
             // let params = m3u8Str.match(/#EXT-X-KEY:([^,]*,?METHOD=([^,]+))?([^,]*,?URI="([^,]+)")?([^,]*,?IV=([^,^\n]+))?/)
             // this.aesConf.method = params[2]
@@ -637,7 +577,6 @@ new Vue({
 
     // 获取AES配置
     getAES() {
-      alert('视频被 AES 加密，点击确认，进行视频解码')
       this.ajax({
         type: 'file',
         url: this.aesConf.uri,
@@ -703,7 +642,7 @@ new Vue({
         this.finishList[index].status = 'finish'
         this.finishNum++
         if (this.finishNum === this.rangeDownload.targetSegment) {
-          this.downloadFile(this.mediaFileList, this.formatTime(this.beginTime, 'YYYY_MM_DD hh_mm_ss'))
+          this.downloadFile(this.mediaFileList, this.title + this.formatTime(this.beginTime, 'YYYY_MM_DD hh_mm_ss'))
         }
         callback && callback()
       })
@@ -807,7 +746,7 @@ new Vue({
     // 强制下载现有片段
     forceDownload() {
       if (this.mediaFileList.length) {
-        this.downloadFile(this.mediaFileList, this.formatTime(this.beginTime, 'YYYY_MM_DD hh_mm_ss'))
+        this.downloadFile(this.mediaFileList, this.title + this.formatTime(this.beginTime, 'YYYY_MM_DD hh_mm_ss'))
       } else {
         alert('当前无已下载片段')
       }
@@ -867,7 +806,6 @@ new Vue({
           document.body.appendChild($vue);
           document.body.appendChild($mp4);
           document.body.appendChild($ase);
-          alert('注入成功，请滚动到页面底部，若白屏则等待资源加载')
           `;
             this.copyToClipboard(codeStr);
             this.tips = '复制成功，打开视频网页控制台，注入本代码';
